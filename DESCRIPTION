@@ -1,8 +1,8 @@
 Package: fastLink
 Type: Package
 Title: Fast Probabilistic Record Linkage with Missing Data
-Version: 0.1.0
-Date: 2017-07-08
+Version: 0.1.1
+Date: 2017-07-10
 Authors@R: c(
   person("Ted", "Enamorado", email = "fastlinkr@gmail.com", role = c("aut", "cre")),
   person("Ben", "Fifield", email = "fastlinkr@gmail.com", role = c("aut")),
@@ -16,8 +16,8 @@ Description: Implements a Fellegi-Sunter probabilistic record linkage model that
     Records'', available at <http://imai.princeton.edu/research/linkage.html>.
 License: GPL (>= 3)
 Imports: Matrix, parallel, foreach, doParallel, gtools, data.table,
-        stringdist, stringr, Rcpp (>= 0.12.9), Hmisc, FactoClass,
-        adagio, dplyr
+        stringdist, stringr, Rcpp (>= 0.12.9), FactoClass, adagio,
+        dplyr
 Depends: R (>= 3.1.0)
 LinkingTo: RcppArmadillo, Rcpp, RcppEigen
 Encoding: UTF-8
@@ -25,10 +25,10 @@ LazyData: true
 BugReports: https://github.com/kosukeimai/fastLink/issues
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2017-07-09 13:17:11 UTC; benfifield
+Packaged: 2017-07-11 03:09:00 UTC; benfifield
 Author: Ted Enamorado [aut, cre],
   Ben Fifield [aut],
   Kosuke Imai [aut]
 Maintainer: Ted Enamorado <fastlinkr@gmail.com>
 Repository: CRAN
-Date/Publication: 2017-07-09 14:24:16 UTC
+Date/Publication: 2017-07-11 05:20:14 UTC
