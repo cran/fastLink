@@ -11,7 +11,7 @@ cut.a.num, cut.p.num,
 priors.obj, w.lambda, w.pi,
 address.field, gender.field, estimate.only, em.obj,
 dedupe.matches, linprog.dedupe,
-reweight.names, firstname.field,
+reweight.names, firstname.field, cond.indep,
 n.cores, tol.em, threshold.match, return.all, return.df, verbose)
 }
 \arguments{
@@ -76,6 +76,9 @@ estimated on a smaller sample, and the user wants to apply them to the full data
 
 \item{firstname.field}{The name of the field indicating first name. Must be provided if reweight.names = TRUE.}
 
+\item{cond.indep}{Estimates for the parameters of interest are obtained from the Fellegi-Sunter model under conditional independence. Default is TRUE. 
+If set to FALSE parameters estimates are obtained from a model that allows for dependencies across linkage fields.}
+
 \item{n.cores}{Number of cores to parallelize over. Default is NULL.}
 
 \item{tol.em}{Convergence tolerance for the EM Algorithm. Default is 1e-04.}
@@ -98,6 +101,7 @@ in the first column, and the indices of the corresponding successful matches in 
 second column.}
 \item{EM}{A list with the output of the EM algorithm, which contains the exact matching
 patterns and the associated posterior probabilities of a match for each matching pattern.}
+\item{patterns}{A matrix with the observed matching patterns for each successfully matched pair.}
 \item{nobs.a}{The number of observations in dataset A.}
 \item{nobs.b}{The number of observations in dataset B.}
 \item{zeta.name}{If reweighting by name, the posterior probability of a match for each match in dataset A and B.}

@@ -30,12 +30,12 @@
 #'
 #' @return \code{emlinkMARmov} returns a list with the following components:
 #' \item{zeta.j}{The posterior match probabilities for each unique pattern.}
-#' \item{p.m}{The posterior probability of a pair matching.}
-#' \item{p.u}{The posterior probability of a pair not matching.}
-#' \item{p.gamma.k.m}{The posterior of the matching probability for a specific matching field.}
-#' \item{p.gamma.k.u}{The posterior of the non-matching probability for a specific matching field.}
-#' \item{p.gamma.j.m}{The posterior probability that a pair is in the matched set given a particular agreement pattern.}
-#' \item{p.gamma.j.u}{The posterior probability that a pair is in the unmatched set given a particular agreement pattern.}
+#' \item{p.m}{The probability of a pair matching.}
+#' \item{p.u}{The probability of a pair not matching.}
+#' \item{p.gamma.k.m}{The matching probability for a specific matching field.}
+#' \item{p.gamma.k.u}{The non-matching probability for a specific matching field.}
+#' \item{p.gamma.j.m}{The probability that a pair is in the matched set given a particular agreement pattern.}
+#' \item{p.gamma.j.u}{The probability that a pair is in the unmatched set given a particular agreement pattern.}
 #' \item{patterns.w}{Counts of the agreement patterns observed, along with the Felligi-Sunter Weights.}
 #' \item{iter.converge}{The number of iterations it took the EM algorithm to converge.}
 #' \item{nobs.a}{The number of observations in dataset A.}
@@ -181,17 +181,9 @@ emlinkMARmov <- function(patterns, nobs.a, nobs.b,
     if (is.null(p.gamma.k.m)) {
         p.gamma.k.m <- list()
         for (i in 1:nfeatures) {
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 3){
-                p.gamma.k.m[[i]] <-  sort(rdirichlet(1, c(1, 50, 100)), decreasing = FALSE)
-            }
-
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 2){
-                p.gamma.k.m[[i]] <-  sort(rdirichlet(1, c(1, 10000)), decreasing = FALSE)
-            }
-
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 1){
-                p.gamma.k.m[[i]] <-  sort(rdirichlet(1, c(1)), decreasing = FALSE)
-            }
+        	l.m <- length(unique(na.omit(gamma.j.k[, i])))
+        	c.m <- seq(from = 1, to = 50 * l.m, by = 50)
+            p.gamma.k.m[[i]] <- sort(rdirichlet(1, c.m), decreasing = FALSE)
         }
     }
 
@@ -199,17 +191,9 @@ emlinkMARmov <- function(patterns, nobs.a, nobs.b,
     if (is.null(p.gamma.k.u)) {
         p.gamma.k.u <- list()
         for (i in 1:nfeatures) {
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 3){
-                p.gamma.k.u[[i]] <-  sort(rdirichlet(1, c(1, 50, 100)), decreasing = TRUE)
-            }
-
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 2){
-                p.gamma.k.u[[i]] <-  sort(rdirichlet(1, c(1, 10000)), decreasing = TRUE)
-            }
-
-            if(length(unique(na.omit(gamma.j.k[, i]))) == 1){
-                p.gamma.k.u[[i]] <-  sort(rdirichlet(1, c(1)), decreasing = TRUE)
-            }
+        	l.u <- length(unique(na.omit(gamma.j.k[, i])))
+        	c.u <- seq(from = 1, to = 50 * l.u, by = 50)
+	        p.gamma.k.u[[i]] <- sort(rdirichlet(1, c.u), decreasing = TRUE)
         }
     }
 

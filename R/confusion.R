@@ -30,13 +30,18 @@ confusion <- function(object, threshold = .85) {
     if(!("confusionTable" %in% class(object))){
         stop("You can only run 'confusion()' if 'return.all = TRUE' in 'fastLink()'.")
     }
-    
+
+	## TM
     D <- sum(object$posterior * ifelse(object$posterior >= threshold, 1, 0))
-    B <- sum((1 - object$posterior) * ifelse(object$posterior >= threshold, 1, 0))
-    C <- sum(object$posterior * ifelse(object$posterior < threshold, 1, 0)) + (min(object$nobs.a, object$nobs.b) - A) * 0.001
-    A <- sum((1 - object$posterior) * ifelse(object$posterior < threshold, 1, 0)) + (min(object$nobs.a, object$nobs.b) - A) * (1 - 0.001)
+	## FP
+    B <- sum(ifelse(object$posterior >= threshold, 1, 0)) - D
+	## TNM
+	  A.1 <- sum((1 - object$posterior) * ifelse(object$posterior < threshold, 1, 0))
+    A <- A.1 + (min(object$nobs.a, object$nobs.b) - D - B - A.1) * (1 - 0.001)
+	## FN
+    C <- (min(object$nobs.a, object$nobs.b) - D - B) - A
     
-    t1 <- round(rbind(c(A,B), c(C,D)), 1)
+    t1 <- round(rbind(c(D, B), c(C, A)), 2)
     colnames(t1) <- c("'True' Matches", "'True' Non-Matches")
     rownames(t1) <- c("Declared Matches", "Declared Non-Matches")
     
@@ -47,9 +52,10 @@ confusion <- function(object, threshold = .85) {
     npv  = 100 * A/(A + C)
     fpr  = 100 * B/(A + B)
     fnr  = 100 * C/(C + D)
-    acc  = 100 *(A + D)/N
-    
-    t2 <- round(as.matrix(c(N, sens, spec, ppv, npv, fpr, fnr, acc)), digits = 2)
+    acc  = 100 * (A + D)/N
+    f1 = (2 * ppv * sens) / (ppv + sens)
+
+    t2 <- round(as.matrix(c(N, sens, spec, ppv, npv, fpr, fnr, acc, f1)), digits = 4)
 
     rownames(t2) <- c("Max Number of Obs to be Matched", 
                       "Sensitivity (%)",
@@ -58,11 +64,12 @@ confusion <- function(object, threshold = .85) {
                       "Negative Predicted Value (%)",
                       "False Positive Rate (%)",
                       "False Negative Rate (%)",
-                      "Correctly Clasified (%)")
+                      "Correctly Clasified (%)",
+                      "F1 Score (%)")
     colnames(t2) <- "results"
     results <- list()				 
     results$confusion.table <- t1
-    results$addition.info <- round(t2, 1)
+    options(digits = 6)
+    results$addition.info <- round(t2, digits = 2)
     return(results)
 }
-
