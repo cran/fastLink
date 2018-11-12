@@ -1,8 +1,8 @@
 Package: fastLink
 Type: Package
 Title: Fast Probabilistic Record Linkage with Missing Data
-Version: 0.4.0
-Date: 2018-05-15
+Version: 0.5.0
+Date: 2018-11-01
 Authors@R: c(
   person("Ted", "Enamorado", email = "fastlinkr@gmail.com", role = c("aut", "cre")),
   person("Ben", "Fifield", email = "fastlinkr@gmail.com", role = c("aut")),
@@ -26,10 +26,10 @@ BugReports: https://github.com/kosukeimai/fastLink/issues
 RoxygenNote: 6.0.1
 Suggests: testthat
 NeedsCompilation: yes
-Packaged: 2018-05-15 19:36:45 UTC; benfifield
+Packaged: 2018-11-02 15:23:12 UTC; benfifield
 Author: Ted Enamorado [aut, cre],
   Ben Fifield [aut],
   Kosuke Imai [aut]
 Maintainer: Ted Enamorado <fastlinkr@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-05-15 20:22:48 UTC
+Date/Publication: 2018-11-12 16:50:02 UTC

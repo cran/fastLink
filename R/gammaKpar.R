@@ -48,17 +48,17 @@ gammaKpar <- function(matAp, matBp, gender = FALSE, n.cores = NULL) {
 
     if(!gender){
         if(sum(is.na(matAp)) == length(matAp) | length(unique(matAp)) == 1){
-            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.")
+            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.\n")
         }
         if(sum(is.na(matBp)) == length(matBp) | length(unique(matBp)) == 1){
-            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.")
+            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.\n")
         }
     }else{
         if(sum(is.na(matAp)) == length(matAp)){
-            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.")
+            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.\n")
         }
         if(sum(is.na(matBp)) == length(matBp)){
-            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.")
+            cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.\n")
         }
     }
 
@@ -76,21 +76,25 @@ gammaKpar <- function(matAp, matBp, gender = FALSE, n.cores = NULL) {
     ht1 <- new.env(hash=TRUE)
     ht2 <- new.env(hash=TRUE)
     matches.l <- as.list(matches)
-
+    
     if(Sys.info()[['sysname']] == "Windows") {
-        nc <- n.cores
-        cl <- makeCluster(nc)
+      if (n.cores == 1) '%oper%' <- foreach::'%do%'
+      else { 
+        '%oper%' <- foreach::'%dopar%'
+        cl <- makeCluster(n.cores)
         registerDoParallel(cl)
-        final.list <- foreach(i = 1:length(matches.l)) %dopar% {
-            ht1 <- which(matrix.1 == matches.l[[i]]); ht2 <- which(matrix.2 == matches.l[[i]])
-            list(ht1, ht2)
-        }
-        stopCluster(cl)
+        on.exit(stopCluster(cl))
+      }
+      
+      final.list <- foreach(i = 1:length(matches.l)) %oper% {
+        ht1 <- which(matrix.1 == matches.l[[i]]); ht2 <- which(matrix.2 == matches.l[[i]])
+        list(ht1, ht2)
+      }
+      
     } else {
-    	no_cores <- n.cores
-    	final.list <- mclapply(matches.l, function(s){
-            ht1[[s]] <- which(matrix.1 == s); ht2[[s]] <- which(matrix.2 == s);
-            list(ht1[[s]], ht2[[s]]) }, mc.cores = getOption("mc.cores", no_cores))
+      final.list <- mclapply(matches.l, function(s){
+        ht1[[s]] <- which(matrix.1 == s); ht2[[s]] <- which(matrix.2 == s);
+        list(ht1[[s]], ht2[[s]]) }, mc.cores = getOption("mc.cores", n.cores))
     }
     
     na.list <- list()

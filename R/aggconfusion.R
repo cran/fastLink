@@ -1,6 +1,6 @@
 #' aggconfusion
 #'
-#' Aggregate confusion tables from separate runs of fastLink()
+#' Aggregate confusion tables from separate runs of fastLink() (UNDER DEVELOPMENT)
 #'
 #' @usage aggconfusion(object)
 #'

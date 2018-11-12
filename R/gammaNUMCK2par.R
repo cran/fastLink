@@ -28,7 +28,7 @@
 ## in parallel
 ## ------------------------
 gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
-
+    
     if(any(class(matAp) %in% c("tbl_df", "data.table"))){
         matAp <- as.data.frame(matAp)[,1]
     }
@@ -40,10 +40,10 @@ gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
     matBp[matBp == ""] <- NA
 
     if(sum(is.na(matAp)) == length(matAp) | length(unique(matAp)) == 1){
-        cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.")
+        cat("WARNING: You have no variation in this variable, or all observations are missing in dataset A.\n")
     }
     if(sum(is.na(matBp)) == length(matBp) | length(unique(matBp)) == 1){
-        cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.")
+        cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.\n")
     }
     
     if(is.null(n.cores)) {
@@ -53,8 +53,10 @@ gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
     matrix.1 <- as.matrix(as.numeric(matAp))
     matrix.2 <- as.matrix(as.numeric(matBp))
 
-    matrix.1[is.na(matrix.1)] <- 9999
-    matrix.2[is.na(matrix.2)] <- 9998
+    max <- max(max(matrix.1, na.rm = T), max(matrix.2, na.rm = T))   
+    end.points <- c((round((max), 0) + 1), (round(max + cut.a, 0) + 3))
+    matrix.1[is.na(matrix.1)] <- end.points[2]
+    matrix.2[is.na(matrix.2)] <- end.points[1]
 
     u.values.1 <- unique(matrix.1)
     u.values.2 <- unique(matrix.2)
@@ -98,17 +100,20 @@ gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
 
     do <- expand.grid(1:n.slices2, 1:n.slices1)
 
-    nc <- n.cores2
-    cl <- makeCluster(nc)
-    registerDoParallel(cl)
+    if (n.cores2 == 1) '%oper%' <- foreach::'%do%'
+    else { 
+        '%oper%' <- foreach::'%dopar%'
+        cl <- makeCluster(n.cores2)
+        registerDoParallel(cl)
+        on.exit(stopCluster(cl))
+    }
 
-    temp.f <- foreach(i = 1:nrow(do), .packages = c("Rcpp", "Matrix")) %dopar% {
+    temp.f <- foreach(i = 1:nrow(do), .packages = c("Rcpp", "Matrix")) %oper% {
         r1 <- do[i, 1]
         r2 <- do[i, 2]
         difference(temp.1[[r1]], temp.2[[r2]], cut.a)
     }
 
-    stopCluster(cl)
     gc()
 
     reshape2 <- function(s) { s[[1]] }
@@ -123,15 +128,19 @@ gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
     matches.2 <- lapply(seq_len(nrow(n.values.2)), function(i) n.values.2[i, ])
 
     if(Sys.info()[['sysname']] == 'Windows') {
-        nc <- n.cores
-        cl <- makeCluster(nc)
-        registerDoParallel(cl)
+        if (n.cores == 1) '%oper%' <- foreach::'%do%'
+        else { 
+            '%oper%' <- foreach::'%dopar%'
+            cl <- makeCluster(n.cores)
+            registerDoParallel(cl)
+            on.exit(stopCluster(cl))
+        }
 
-        final.list2 <- foreach(i = 1:length(matches.2)) %dopar% {
+        final.list2 <- foreach(i = 1:length(matches.2)) %oper% {
             ht1 <- which(matrix.1 == matches.2[[i]][[1]]); ht2 <- which(matrix.2 == matches.2[[i]][[2]])
             list(ht1, ht2)
       	}
-        stopCluster(cl)
+
     } else {
         no_cores <- n.cores
         final.list2 <- mclapply(matches.2, function(s){
@@ -140,8 +149,8 @@ gammaNUMCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 1) {
     }
     
     na.list <- list()
-    na.list[[1]] <- which(matrix.1 == "9999")
-    na.list[[2]] <- which(matrix.2 == "9998")
+    na.list[[1]] <- which(matrix.1 == end.points[2])
+    na.list[[2]] <- which(matrix.2 == end.points[1])
 
     out <- list()
     out[["matches2"]] <- final.list2
