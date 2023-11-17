@@ -56,8 +56,8 @@ gammaNUMCKpar <- function(matAp, matBp, n.cores = NULL, cut.a = 1, cut.p = 2) {
     u.values.1 <- unique(matrix.1)
     u.values.2 <- unique(matrix.2)
 
-    n.slices1 <- max(round(length(u.values.1)/(4500), 0), 1) 
-    n.slices2 <- max(round(length(u.values.2)/(4500), 0), 1) 
+    n.slices1 <- max(round(length(u.values.1)/(10000), 0), 1) 
+    n.slices2 <- max(round(length(u.values.2)/(10000), 0), 1) 
 
     limit.1 <- round(quantile((0:nrow(u.values.2)), p = seq(0, 1, 1/n.slices2)), 0)
     limit.2 <- round(quantile((0:nrow(u.values.1)), p = seq(0, 1, 1/n.slices1)), 0)
@@ -83,9 +83,13 @@ gammaNUMCKpar <- function(matAp, matBp, n.cores = NULL, cut.a = 1, cut.p = 2) {
         t[ t > cut[2] ] <- 0
         t <- Matrix(t, sparse = T)
 
-        t@x[t@x <= cut[1]] <- cut[2] + 1; gc()       	                
-        t@x[t@x > cut[1] & t@x <= cut[2]] <- 1; gc()       	
-
+        if(is(t, "ddiMatrix")) {
+          t <- t * (cut[2] + 1)
+        } else {
+          t@x[t@x <= cut[1]] <- cut[2] + 1; gc()       	                
+          t@x[t@x > cut[1] & t@x <= cut[2]] <- 1; gc()       	
+        }
+        
         slice.1 <- m[[2]]
         slice.2 <- y[[2]]
         indexes.2 <- which(t == cut[2] + 1, arr.ind = T)

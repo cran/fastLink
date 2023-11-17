@@ -10,7 +10,7 @@
 #' @param similarity.threshold Lower bound on string-distance measure for being considered a possible match.
 #' If an observation has no possible matches above this threshold, it is discarded from the match. Default is 0.8.
 #' @param stringdist.method The method to use for calculating string-distance similarity. Possible values are
-#' 'jaro' (Jaro Distance), 'jw' (Jaro-Winkler), and 'lv' (Levenshtein). Default is 'jw'.
+#' 'jaro' (Jaro Distance), 'dl' Damerau-Levenshtein, 'jw' (Jaro-Winkler), and 'lv' (Levenshtein). Default is 'jw'.
 #' @param jw.weight Parameter that describes the importance of the first characters of a string (only needed if stringdist.method = "jw"). Default is .10.
 #' @param n.cores Number of cores to parallelize over. Default is NULL.
 #'
@@ -27,13 +27,13 @@ stringSubset <- function(vecA, vecB,
                          similarity.threshold = .8, stringdist.method = "jw",
                          jw.weight = .10, n.cores = NULL){
 
-    if(class(vecA) == "factor"){
+    if(is(vecA, "factor")){
         vecA <- as.character(vecA)
     }
-    if(class(vecB) == "factor"){
+    if(is(vecB, "factor")){
         vecB <- as.character(vecB)
     }
-    if(class(vecA) != "character" | class(vecB) != "character"){
+    if(!is(vecA, "character") | !is(vecB, "character")){
         stop("vecA and vecB must be of class factor or character.")
     }
     if(!(stringdist.method %in% c("jw", "jaro", "lv"))){
@@ -225,13 +225,13 @@ combineBlocks <- function(blocklist){
 
 kmeansBlock <- function(vecA, vecB, nclusters, iter.max, n.cores){
     
-    if(class(vecA) == "factor"){
-        vecA <- as.character(vecA)
-    }
-    if(class(vecB) == "factor"){
-        vecB <- as.character(vecB)
-    }
-    
+  if(is(vecA, "factor")){
+    vecA <- as.character(vecA)
+  }
+  if(is(vecB, "factor")){
+    vecB <- as.character(vecB)
+  }
+
     ## Clean and combine
     vec <- c(vecA, vecB)
     setid <- c(rep("A", length(vecA)), rep("B", length(vecB)))

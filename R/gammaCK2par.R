@@ -10,7 +10,7 @@
 #' @param matBp vector storing the comparison field in data set 2
 #' @param n.cores Number of cores to parallelize over. Default is NULL.
 #' @param cut.a Lower bound for full match, ranging between 0 and 1. Default is 0.92
-#' @param method String distance method, options are: "jw" Jaro-Winkler (Default), "jaro" Jaro, and "lv" Edit
+#' @param method String distance method, options are: "jw" Jaro-Winkler (Default), "dl" Damerau-Levenshtein, "jaro" Jaro, and "lv" Edit
 #' @param w Parameter that describes the importance of the first characters of a string (only needed if method = "jw"). Default is .10
 #'
 #' @return \code{gammaCK2par} returns a list with the indices corresponding to each
@@ -49,8 +49,8 @@ gammaCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 0.92, method = "jw
         cat("WARNING: You have no variation in this variable, or all observations are missing in dataset B.\n")
     }
 
-    if(!(method %in% c("jw", "jaro", "lv"))){
-        stop("Invalid string distance method. Method should be one of 'jw', 'jaro', or 'lv'.")
+    if(!(method %in% c("jw", "jaro", "lv", "dl"))){
+        stop("Invalid string distance method. Method should be one of 'jw', 'dl', 'jaro', or 'lv'.")
     }
 
     if(method == "jw" & !is.null(w)){
@@ -72,8 +72,8 @@ gammaCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 0.92, method = "jw
     u.values.1 <- unique(matrix.1)
     u.values.2 <- unique(matrix.2)
 
-    n.slices1 <- max(round(length(u.values.1)/(4500), 0), 1) 
-    n.slices2 <- max(round(length(u.values.2)/(4500), 0), 1) 
+    n.slices1 <- max(round(length(u.values.1)/(10000), 0), 1) 
+    n.slices2 <- max(round(length(u.values.2)/(10000), 0), 1) 
 
     limit.1 <- round(quantile((0:nrow(u.values.2)), p = seq(0, 1, 1/n.slices2)), 0)
     limit.2 <- round(quantile((0:nrow(u.values.1)), p = seq(0, 1, 1/n.slices1)), 0)
@@ -107,7 +107,7 @@ gammaCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 0.92, method = "jw
         }
 
         if(strdist == "lv") {
-            t <- stringdistmatrix(e, x, method = method, nthread = 1)
+            t <- stringdistmatrix(e, x, method = "lv", nthread = 1)
             t.1 <- nchar(as.matrix(e))
             t.2 <- nchar(as.matrix(x))
             o <- t(apply(t.1, 1, function(w){ ifelse(w >= t.2, w, t.2)}))
@@ -116,7 +116,23 @@ gammaCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 0.92, method = "jw
             t <- Matrix(t, sparse = T)
         }
         
-        t@x[t@x >= cut] <- 2; gc()       	
+        if(strdist == "dl") {
+          t <- stringdistmatrix(e, x, method = "dl", nthread = 1)
+          t.1 <- nchar(as.matrix(e))
+          t.2 <- nchar(as.matrix(x))
+          o <- t(apply(t.1, 1, function(w){ ifelse(w >= t.2, w, t.2)}))
+          t <- 1 - t * (1/o)
+          t[ t < cut ] <- 0
+          t <- Matrix(t, sparse = T)
+        }
+        
+        if(is(t, "ddiMatrix")) {
+          t <- t * 2
+        } else {
+          t@x[t@x >= cut] <- 2
+        }
+        gc()
+        
         slice.1 <- m[[2]]
         slice.2 <- y[[2]]
         indexes.2 <- which(t == 2, arr.ind = T)
@@ -188,7 +204,7 @@ gammaCK2par <- function(matAp, matBp, n.cores = NULL, cut.a = 0.92, method = "jw
 
     if(length(matches.2) == 0){ 
       final.list2 <- list()
-      warning("There are no identical (or nearly identical) matches. We suggest either changing the value of cut.p") 
+      warning("There are no identical (or nearly identical) matches. We suggest changing the value of cut.a") 
     }
     
     na.list <- list()

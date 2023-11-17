@@ -26,7 +26,7 @@ Must be present in both dfA and dfB}
 which variables should use string distance matching. Must be a subset of
 'varnames' and must not be present in 'numeric.match'.}
 
-\item{stringdist.method}{String distance method for calculating similarity, options are: "jw" Jaro-Winkler (Default), "jaro" Jaro, and "lv" Edit}
+\item{stringdist.method}{String distance method for calculating similarity, options are: "jw" Jaro-Winkler (Default), "dl" Damerau-Levenshtein, "jaro" Jaro, and "lv" Edit}
 
 \item{numeric.match}{A vector of variable names indicating which variables should use numeric matching.
 Must be a subset of 'varnames' and must not be present in 'stringdist.match'.}
@@ -88,7 +88,7 @@ user wants to declare a match. For instance, threshold.match = .85 will return a
 while threshold.match = c(.85, .95) will return all pairs with posterior probability between .85 and .95 as matches.}
 
 \item{return.all}{Whether to return the most likely match for each observation in dfA and dfB. Overrides user setting of \code{threshold.match} by setting
-\code{threshold.match} to 0.0001, and automatically dedupes all matches. Default is TRUE.}
+\code{threshold.match} to 0.0001, and automatically dedupes all matches. Default is FALSE.}
 
 \item{return.df}{Whether to return the entire dataframe of dfA and dfB instead of just the indices. Default is FALSE.}
 
